@@ -37,6 +37,10 @@ RSpec.configure do |config|
   # Initialize FactoryBot helpers
   config.include FactoryBot::Syntax::Methods
 
+  # Json helpers
+  require_relative 'support/json_helpers'
+  config.include JsonHelpers, type: :request
+
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.

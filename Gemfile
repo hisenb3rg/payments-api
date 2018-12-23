@@ -9,6 +9,9 @@ gem 'rails', '~> 5.2.2'
 gem 'pg', '>= 0.18', '< 2.0'
 # Use Puma as the app server
 gem 'puma', '~> 3.11'
+# Use this gem for serializing resources into jsonapi format
+gem 'fast_jsonapi', '~> 1.5'
+
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem 'jbuilder', '~> 2.5'
 # Use Redis adapter to run Action Cable in production
@@ -33,6 +36,8 @@ group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'rspec-rails'
   gem 'factory_bot_rails'
+  # use hashie/mash for easier nested hash access in tests
+  gem 'hashie'
 end
 
 group :development do
