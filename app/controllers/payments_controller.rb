@@ -1,6 +1,7 @@
 # Implements jsonapi endpoint for serving payment resources
 class PaymentsController < ApplicationController
   NOT_FOUND = 'Resource Not Found'
+  RESOURCE_INVALID = 'Resource Invalid'
 
   before_action :enforce_jsonapi_accept_header
 
@@ -13,17 +14,31 @@ class PaymentsController < ApplicationController
   def show
     render json: jsonapi(Payment.find(params[:id])), status: :ok
   rescue ActiveRecord::RecordNotFound => e
-    render json: { errors: [error(NOT_FOUND, e.message)] }, status: :not_found
+    render json: jsonapi_error(NOT_FOUND, e.message), status: :not_found
+  end
+
+  # POST /payments
+  def create
+    payment = Payment.new(payment_params)
+    payment.save!
+    render json: jsonapi(payment), status: :created
+  rescue ActiveRecord::RecordInvalid => e
+    render json: jsonapi_error(RESOURCE_INVALID, e.message), status: :unprocessable_entity
   end
 
   private
+
+  def payment_params
+    params.require(:data).require(:attributes)
+      .permit(*Payment::BASIC_ATTRS, Payment::COMPLEX_ATTRS)
+  end
 
   def jsonapi(*args)
     PaymentSerializer.new(*args).serializable_hash
   end
 
-  def error(type, detail)
-    { type: type, detail: detail }
+  def jsonapi_error(type, detail)
+    { errors: [{ type: type, detail: detail }] }
   end
 
   def enforce_jsonapi_accept_header

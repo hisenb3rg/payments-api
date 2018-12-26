@@ -83,4 +83,66 @@ RSpec.describe PaymentsController, type: :request do
       end
     end
   end
+
+  describe 'POST /payments' do
+    let(:payment_attributes) { attributes_for(:payment).merge(amount: '123.45', currency: 'EUR') }
+    let(:payload) {
+      {
+        data: {
+          type: 'Payment',
+          attributes: payment_attributes
+        }
+      }
+    }
+
+    before do
+      post '/payments', params: payload, as: :json, headers: { 'HTTP_ACCEPT': 'application/vnd.api+json' }
+    end
+
+    context 'when successful' do
+      it 'responds with status ok' do
+        expect(response.status).to eq(201)
+      end
+
+      it 'responds with api+json content type' do
+        expect(response.headers['Content-Type']).to start_with('application/vnd.api+json')
+      end
+
+      it 'creates and persists new payment resource' do
+        expect(Payment.exists?(json_response.data.id)).to eq(true)
+      end
+
+      it 'returns newly created payment resources in jsonapi format' do
+        expect(json_response.data.id).to be_present
+        expect_to_be_jsonapi_payment_resource(json_response.data)
+      end
+    end
+
+    context 'when unsuccessful' do
+      context 'when accept header not set to jsonapi type' do
+        it 'fails with status unsupported media' do
+          post '/payments', params: payload, as: :json, headers: { 'HTTP_ACCEPT': 'application/json' }
+
+          expect(response.status).to eq(415)
+        end
+      end
+
+      context 'when payload is missing required attributes' do
+        let(:payment_attributes) { attributes_for(:payment).except(:amount) }
+
+        before do
+          post '/payments', params: payload, as: :json, headers: { 'HTTP_ACCEPT': 'application/vnd.api+json' }
+        end
+
+        it 'fails with status unprocessable entity' do
+          expect(response.status).to eq(422)
+        end
+
+        it 'returns invalid resource error message' do
+          expect(json_response.errors.first.type).to eq('Resource Invalid')
+          expect(json_response.errors.first.detail).to match("Amount can't be blank")
+        end
+      end
+    end
+  end
 end
