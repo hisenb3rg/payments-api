@@ -26,6 +26,14 @@ class PaymentsController < ApplicationController
     render json: jsonapi_error(RESOURCE_INVALID, e.message), status: :unprocessable_entity
   end
 
+  # DELETE /payments/:id
+  def destroy
+    Payment.destroy(params[:id])
+    render nothing: true, status: :no_content
+  rescue ActiveRecord::RecordNotFound => e
+    render json: jsonapi_error(NOT_FOUND, e.message), status: :not_found
+  end
+
   private
 
   def payment_params

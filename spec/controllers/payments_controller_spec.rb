@@ -145,4 +145,46 @@ RSpec.describe PaymentsController, type: :request do
       end
     end
   end
+
+  describe 'DELETE /payments/:id' do
+    let!(:payment) { create(:payment) }
+
+    before do
+      delete "/payments/#{payment.id}", headers: { 'HTTP_ACCEPT': 'application/vnd.api+json' }
+    end
+
+    context 'when successful' do
+      it 'responds with status success, no content' do
+        expect(response.status).to eq(204)
+      end
+
+      it 'deletes payment resource' do
+        expect(Payment.exists?(payment.id)).to eq(false)
+      end
+    end
+
+    context 'when unsuccessful' do
+      context 'when accept header not set to jsonapi type' do
+        it 'fails with status unsupported media' do
+          delete "/payments/#{payment.id}", headers: { 'HTTP_ACCEPT': 'application/json' }
+
+          expect(response.status).to eq(415)
+        end
+      end
+
+      context 'when payment resource not found' do
+        before do
+          delete '/payments/XYZ', headers: { 'HTTP_ACCEPT': 'application/vnd.api+json' }
+        end
+
+        it 'fails with status not found' do
+          expect(response.status).to eq(404)
+        end
+
+        it 'returns not found error message' do
+          expect(json_response.errors.first.type).to eq('Resource Not Found')
+        end
+      end
+    end
+  end
 end
