@@ -26,6 +26,17 @@ class PaymentsController < ApplicationController
     render json: jsonapi_error(RESOURCE_INVALID, e.message), status: :unprocessable_entity
   end
 
+  # PATCH /payments/:id
+  def update
+    payment = Payment.find(params[:id])
+    payment.update!(payment_params)
+    render json: jsonapi(payment), status: :ok
+  rescue ActiveRecord::RecordInvalid => e
+    render json: jsonapi_error(RESOURCE_INVALID, e.message), status: :unprocessable_entity
+  rescue ActiveRecord::RecordNotFound => e
+    render json: jsonapi_error(NOT_FOUND, e.message), status: :not_found
+  end
+
   # DELETE /payments/:id
   def destroy
     Payment.destroy(params[:id])

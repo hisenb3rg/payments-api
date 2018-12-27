@@ -146,6 +146,97 @@ RSpec.describe PaymentsController, type: :request do
     end
   end
 
+  describe 'PATCH /payments/:id' do
+    let!(:payment) { create(:payment) }
+    let(:payload) {
+      {
+        data: {
+          type: 'Payment',
+          attributes: {
+            amount: '666.66',
+            fx: {
+              original_amount: '550.00',
+              original_currency: 'GBP',
+            }
+          },
+        }
+      }
+    }
+
+    context 'when successful' do
+      before do
+        patch "/payments/#{payment.id}",
+          params: payload, as: :json,
+          headers: { 'HTTP_ACCEPT': 'application/vnd.api+json' }
+      end
+
+      it 'responds with status ok' do
+        expect(response.status).to eq(200)
+      end
+
+      it 'responds with api+json content type' do
+        expect(response.headers['Content-Type']).to start_with('application/vnd.api+json')
+      end
+
+      it 'updates payment resource' do
+        payment.reload
+        expect(payment.amount).to eq('666.66')
+        expect(payment.fx).to eq('original_amount' => '550.00', 'original_currency' => 'GBP')
+      end
+
+      it 'returns updated payment resource in jsonapi format' do
+        expect(json_response.data.id).to eq(payment.id)
+        expect(json_response.data.attributes.amount).to eq('666.66')
+        expect_to_be_jsonapi_payment_resource(json_response.data)
+      end
+    end
+
+    context 'when unsuccessful' do
+      context 'when accept header not set to jsonapi type' do
+        it 'fails with status unsupported media' do
+          patch "/payments/#{payment.id}",
+            params: payload, as: :json,
+            headers: { 'HTTP_ACCEPT': 'application/json' }
+
+          expect(response.status).to eq(415)
+        end
+      end
+
+      context 'when updated resource is no longer valid xxx' do
+        before do
+          payload[:data][:attributes][:amount] = nil
+          patch "/payments/#{payment.id}",
+            params: payload, as: :json,
+            headers: { 'HTTP_ACCEPT': 'application/vnd.api+json' }
+        end
+
+        it 'fails with status unprocessable entity' do
+          expect(response.status).to eq(422)
+        end
+
+        it 'returns invalid resource error message' do
+          expect(json_response.errors.first.type).to eq('Resource Invalid')
+          expect(json_response.errors.first.detail).to match("Amount can't be blank")
+        end
+      end
+
+      context 'when payment resource not found' do
+        before do
+          patch '/payments/XYZ', params: payload, as: :json,
+            headers: { 'HTTP_ACCEPT': 'application/vnd.api+json' }
+        end
+
+        it 'fails with status not found' do
+          expect(response.status).to eq(404)
+        end
+
+        it 'returns not found error message' do
+          expect(json_response.errors.first.type).to eq('Resource Not Found')
+        end
+      end
+    end
+  end
+
   describe 'DELETE /payments/:id' do
     let!(:payment) { create(:payment) }
 
