@@ -35,6 +35,8 @@ RSpec.describe Payment do
       expect(attrs['reference']).to eq(payment.reference)
       expect(attrs['scheme_payment_sub_type']).to eq(payment.scheme_payment_sub_type)
       expect(attrs['scheme_payment_type']).to eq(payment.scheme_payment_type)
+      expect(attrs['version']).to eq(payment.version)
+      expect(attrs['organisation_id']).to eq(payment.organisation_id)
     end
 
     it 'includes complex attributes' do

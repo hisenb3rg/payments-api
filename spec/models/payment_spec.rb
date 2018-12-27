@@ -97,5 +97,23 @@ RSpec.describe Payment, type: :model do
         expect(subject.errors[:currency]).to include('is not in ISO currency format')
       end
     end
+
+    describe '#version' do
+      it 'validates presence' do
+        subject.version = nil
+
+        expect(subject).not_to be_valid
+        expect(subject.errors[:version]).to include("can't be blank")
+      end
+    end
+
+    describe '#organisation_id' do
+      it 'validates presence' do
+        subject.organisation_id = nil
+
+        expect(subject).not_to be_valid
+        expect(subject.errors[:organisation_id]).to include("can't be blank")
+      end
+    end
   end
 end

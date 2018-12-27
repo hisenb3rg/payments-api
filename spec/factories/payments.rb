@@ -12,6 +12,8 @@ FactoryBot.define do
     reference { "Payment for Em's piano lessons" }
     scheme_payment_sub_type { 'InternetBanking' }
     scheme_payment_type { 'ImmediatePayment' }
+    version { 0 }
+    organisation_id { '743d5b63-8e6f-432e-a8fa-c5d8d2ee5fcb' }
 
     beneficiary_party { {
       account_name: 'W Owens',

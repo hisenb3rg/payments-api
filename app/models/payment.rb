@@ -4,6 +4,7 @@ class Payment < ApplicationRecord
     :amount, :currency, :end_to_end_reference, :numeric_reference,
     :payment_id, :payment_purpose, :payment_scheme, :payment_type,
     :processing_date, :reference, :scheme_payment_type, :scheme_payment_sub_type,
+    :version, :organisation_id
   ]
 
   PARTY_ATTRS = [
@@ -25,4 +26,6 @@ class Payment < ApplicationRecord
   validates :amount, presence: true, numericality: true
   validates :currency, presence: true,
     format: { with: /[A-Z]{3}/, message: 'is not in ISO currency format' }
+  validates :version, presence: true
+  validates :organisation_id, presence: true
 end
