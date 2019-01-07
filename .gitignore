@@ -17,4 +17,7 @@
 /storage/*
 !/storage/.keep
 
+# Docker bind mount for postgres data
+/db/pgdata
+
 .byebug_history

@@ -1,23 +1,27 @@
-version: "2"
-
-volumes:
-  db-data:
-    external: false
+version: "3.4"
 
 services:
   db:
     image: postgres
-    env_file: .env
+    environment:
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASS
     volumes:
-      - db-data:/var/lib/postgresql/db-data
+      - ./db/pgdata:/var/lib/postgresql/data:delegated
     ports:
       - "5433:5432"
 
   app:
     build: .
-    env_file: .env
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -b '0.0.0.0'"
+    environment:
+      - RAILS_ENV=$RAILS_ENV
+      - APP_DOMAIN=$APP_DOMAIN
+      - POSTGRES_HOST=$POSTGRES_HOST
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASS=$POSTGRES_PASS
     volumes:
-      - .:/usr/src/app
+      - .:/usr/src/app:cached
     ports:
       - "3000:3000"
     depends_on:

@@ -28,7 +28,7 @@ Docker environment to deploy it and use it.
 
 #### Environment and database setup
 * prepare `.env` by running `cp config/env.example .env`
-* set POSTGRES_USER and POSTGRES_PASSWORD inside `.env` (can be anything)
+* set POSTGRES_USER and POSTGRES_PASS inside `.env` (can be anything)
 * build app image with `docker-compose build` (be patient)
 * initialize database with `docker-compose run --rm app rake db:setup`
 
